@@ -4,7 +4,6 @@ import com.frame.tcctransaction.common.CommonInfo;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,10 +29,6 @@ public class TwoStagesAspect {
         }
     };
 
-    @Pointcut("@annotation(com.frame.payment.common.TwoStages)")
-    private void pointcut() {
-    }
-
     @Around("pointcut() && @annotation(twoStages)")
     public void advice(ProceedingJoinPoint joinPoint, TwoStages twoStages) {
 
@@ -43,7 +38,7 @@ public class TwoStagesAspect {
 
             //定义参与者completer(类名、方法名以及参数)
             TwoStageCompleter completer = new TwoStageCompleter();
-            completer.setClassName(joinPoint.getSignature().getDeclaringType().getName());
+            completer.setTargetClass(joinPoint.getSignature().getClass());
             completer.setMethodName(joinPoint.getSignature().getName());
             completer.setCommonInfo(commonInfo);
 

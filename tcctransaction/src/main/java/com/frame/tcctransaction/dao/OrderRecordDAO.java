@@ -19,4 +19,12 @@ public interface OrderRecordDAO extends JpaRepository<OrderRecord, Integer> {
      */
     public List<OrderRecord> findByStatus(String name);
 
+    /**
+     * update by order id
+     *
+     * @param orderRecord
+     */
+    public void updateByOrderId(OrderRecord orderRecord);
+
+
 }

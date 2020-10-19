@@ -1,6 +1,7 @@
 package com.frame.tcctransaction.core;
 
 import com.frame.tcctransaction.client.BalanceServiceClient;
+import com.frame.tcctransaction.client.CouponServiceClient;
 import com.frame.tcctransaction.common.CommonInfo;
 import com.frame.tcctransaction.model.OrderRecord;
 import com.frame.tcctransaction.service.OrderRecordService;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
+ * tcc scheduled task
+ *
  * @author anylots
  * @version $Id: ScheduledTask.java, v 0.1 2020年10月18日 21:22 anylots Exp $
  */
@@ -23,17 +26,25 @@ public class TccScheduledTask {
     @Autowired
     private BalanceServiceClient balanceServiceClient;
 
+    @Autowired
+    private CouponServiceClient couponServiceClient;
+
     /**
      * 每隔十分钟执行, 单位：ms。
      */
     @Scheduled(fixedRate = 10 * 60 * 1000)
-    public void testFixRate() {
+    public void executeFixRate() {
         List<OrderRecord> orderRecords = orderRecordService.findByStatus("INIT");
         for (OrderRecord orderRecord : orderRecords) {
-            //TODO
+
             CommonInfo commonInfo = new CommonInfo();
             commonInfo.setOrderId(orderRecord.getOrderId());
+            commonInfo.setStage(orderRecord.getStatus());
+
             balanceServiceClient.balanceReduce(commonInfo);
+            couponServiceClient.couponUse(commonInfo);
+            orderRecord.setStatus("COMPLETE");
+            orderRecordService.updateByOrderId(orderRecord);
         }
     }
 }

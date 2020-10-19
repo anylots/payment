@@ -19,5 +19,12 @@ public interface OrderRecordService {
      */
     public List<OrderRecord> findByStatus(String status);
 
+    /**
+     * update by order id
+     *
+     * @param orderRecord
+     */
+    public void updateByOrderId(OrderRecord orderRecord);
+
 
 }

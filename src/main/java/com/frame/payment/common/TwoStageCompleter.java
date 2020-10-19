@@ -18,9 +18,9 @@ public class TwoStageCompleter {
 
 
     /**
-     * name of the class 参与者类名
+     * name of the class 参与者类
      */
-    private String className;
+    private Class targetClass;
 
     /**
      * name of the class 参与者方法名
@@ -40,22 +40,13 @@ public class TwoStageCompleter {
      */
     public void invokeAfterPrepare(String stage) {
 
-        //获取参与者Class
-        Class clazz = null;
-        try {
-            clazz = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            logger.error("actor class not found", e);
-            throw new RuntimeException("actor class not found", e);
-        }
-
         //设置参与者请求阶段
         commonInfo.setStage(stage);
 
         //调用参与者提交、回滚
         try {
-            Method method = clazz.getMethod(methodName, new Class[]{CommonInfo.class});
-            method.invoke(ApplicationContextGetBeanHelper.getBean(clazz), commonInfo);
+            Method method = targetClass.getMethod(methodName, new Class[]{CommonInfo.class});
+            method.invoke(ApplicationContextGetBeanHelper.getBean(targetClass), commonInfo);
 
         } catch (ReflectiveOperationException e) {
             logger.error("tcc method invoke error", e);
@@ -65,21 +56,21 @@ public class TwoStageCompleter {
     }
 
     /**
-     * Getter method for property <tt>className</tt>.
+     * Getter method for property <tt>targetClass</tt>.
      *
-     * @return property value of className
+     * @return property value of targetClass
      */
-    public String getClassName() {
-        return className;
+    public Class getTargetClass() {
+        return targetClass;
     }
 
     /**
-     * Setter method for property <tt>className</tt>.
+     * Setter method for property <tt>targetClass</tt>.
      *
-     * @param className value to be assigned to property className
+     * @param targetClass value to be assigned to property targetClass
      */
-    public void setClassName(String className) {
-        this.className = className;
+    public void setTargetClass(Class targetClass) {
+        this.targetClass = targetClass;
     }
 
     /**

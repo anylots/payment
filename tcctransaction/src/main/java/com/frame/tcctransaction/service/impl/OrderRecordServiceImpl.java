@@ -30,4 +30,16 @@ public class OrderRecordServiceImpl implements OrderRecordService {
         List<OrderRecord> orderRecords = orderRecordDAO.findByStatus(status);
         return orderRecords;
     }
+
+    /**
+     * update by order id
+     *
+     * @param orderRecord
+     */
+    @Override
+    public void updateByOrderId(OrderRecord orderRecord) {
+        orderRecordDAO.updateByOrderId(orderRecord);
+    }
+
+
 }

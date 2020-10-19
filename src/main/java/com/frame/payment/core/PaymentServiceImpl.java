@@ -40,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
      * @param payInfo 支付工具信息
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void payWithTwoStage(List<Map<String, Object>> payInfo) {
 
         //step1.开启两阶段提交

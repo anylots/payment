@@ -3,6 +3,8 @@ package com.frame.balance.service;
 import com.frame.tcctransaction.common.CommonInfo;
 
 /**
+ * two stage common service
+ *
  * @author anylots
  * @version $Id: TwoStageCommonService.java, v 0.1 2020年10月17日 14:08 anylots Exp $
  */

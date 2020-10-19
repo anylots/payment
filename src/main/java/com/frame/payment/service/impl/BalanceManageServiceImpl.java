@@ -22,7 +22,7 @@ public class BalanceManageServiceImpl implements BalanceManageService {
     BalanceServiceClient balanceServiceClient;
 
     /**
-     * balance reduce
+     * 现金扣减
      *
      * @param reduceInfo
      */
