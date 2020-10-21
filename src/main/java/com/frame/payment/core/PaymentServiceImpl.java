@@ -3,7 +3,6 @@ package com.frame.payment.core;
 import com.frame.balance.common.request.BalanceReduceInfo;
 import com.frame.coupon.common.request.CouponUseInfo;
 import com.frame.payment.common.TwoStageStarter;
-import com.frame.payment.model.OrderRecord;
 import com.frame.payment.service.BalanceManageService;
 import com.frame.payment.service.CouponManageService;
 import com.frame.payment.service.OrderRecordService;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * implement of PaymentService
@@ -46,13 +44,10 @@ public class PaymentServiceImpl implements PaymentService {
         //step1.开启两阶段提交
         TwoStageStarter.startTwoStage();
 
-        //step2.本地保存订单信息
-        orderRecordService.saveOrderRecord(buildOrderRecord());
-
-        //step3.现金扣减
+        //step2.现金扣减
         balanceManageService.balanceReduce(buildBalanceReduceInfo(payInfo));
 
-        //step4.红包使用
+        //step3.红包使用
         couponManageService.couponUse(buildCouponUseInfo(payInfo));
     }
 
@@ -78,15 +73,6 @@ public class PaymentServiceImpl implements PaymentService {
         couponUseInfo.setUserId("testUserId");
         couponUseInfo.setCouponId("coupon20");
         return couponUseInfo;
-    }
-
-    private OrderRecord buildOrderRecord() {
-
-        OrderRecord orderRecord = new OrderRecord();
-        orderRecord.setUserId("testUserId");
-        orderRecord.setOrderId(UUID.randomUUID().toString());
-        orderRecord.setStatus("INIT");
-        return orderRecord;
     }
 
 }

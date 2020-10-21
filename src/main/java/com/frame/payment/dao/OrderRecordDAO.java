@@ -9,4 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface OrderRecordDAO extends JpaRepository<OrderRecord, Integer> {
 
+    /**
+     * update by order id
+     *
+     * @param orderRecord
+     */
+    public void updateByOrderId(OrderRecord orderRecord);
+
 }

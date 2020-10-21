@@ -1,11 +1,10 @@
 package com.frame.payment.common;
 
+import com.frame.payment.common.util.LoggerUtil;
 import com.frame.tcctransaction.common.CommonInfo;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -18,8 +17,6 @@ import java.util.Set;
 @Component
 @Aspect
 public class TwoStagesAspect {
-
-    private static Logger logger = LoggerFactory.getLogger(TwoStagesAspect.class);
 
     private static final Set<Long> TIME_INTERVALS = new HashSet<Long>() {
         {
@@ -50,7 +47,7 @@ public class TwoStagesAspect {
         try {
             joinPoint.proceed();
         } catch (Throwable throwable) {
-            logger.error("tcc invoke error", throwable);
+            LoggerUtil.error("tcc invoke error", throwable);
             throw new RuntimeException("tcc invoke error", throwable);
         }
     }
@@ -67,7 +64,7 @@ public class TwoStagesAspect {
                 joinPoint.proceed();
                 return;
             } catch (Throwable throwable) {
-                logger.error("tcc process retry error", throwable);
+                LoggerUtil.error("tcc process retry error", throwable);
             }
         }
     }

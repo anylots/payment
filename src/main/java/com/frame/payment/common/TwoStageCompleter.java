@@ -1,8 +1,7 @@
 package com.frame.payment.common;
 
+import com.frame.payment.common.util.LoggerUtil;
 import com.frame.tcctransaction.common.CommonInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 
@@ -13,9 +12,6 @@ import java.lang.reflect.Method;
  * @version $Id: TwoStageSync.java, v 0.1 2020年10月18日 20:14 anylots Exp $
  */
 public class TwoStageCompleter {
-
-    private static Logger logger = LoggerFactory.getLogger(TwoStageCompleter.class);
-
 
     /**
      * name of the class 参与者类
@@ -49,10 +45,10 @@ public class TwoStageCompleter {
             method.invoke(ApplicationContextGetBeanHelper.getBean(targetClass), commonInfo);
 
         } catch (ReflectiveOperationException e) {
-            logger.error("tcc method invoke error", e);
+            LoggerUtil.error("tcc method invoke error", e);
             throw new RuntimeException("tcc method invoke error", e);
         }
-        logger.info("远程参与者事务提交/回滚完成");
+        LoggerUtil.info("远程参与者事务提交/回滚完成");
     }
 
     /**

@@ -15,4 +15,11 @@ public interface OrderRecordService {
      */
     public void saveOrderRecord(OrderRecord orderRecord);
 
+    /**
+     * update by order id
+     *
+     * @param orderRecord
+     */
+    public void updateByOrderId(OrderRecord orderRecord);
+
 }

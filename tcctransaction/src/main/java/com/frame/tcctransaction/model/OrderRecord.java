@@ -21,6 +21,12 @@ public class OrderRecord {
     private String userId;
 
     @Column
+    private String bizType;
+
+    @Column
+    private String context;
+
+    @Column
     private String status;
 
     /**
@@ -75,6 +81,42 @@ public class OrderRecord {
      */
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    /**
+     * Getter method for property <tt>bizType</tt>.
+     *
+     * @return property value of bizType
+     */
+    public String getBizType() {
+        return bizType;
+    }
+
+    /**
+     * Setter method for property <tt>bizType</tt>.
+     *
+     * @param bizType value to be assigned to property bizType
+     */
+    public void setBizType(String bizType) {
+        this.bizType = bizType;
+    }
+
+    /**
+     * Getter method for property <tt>context</tt>.
+     *
+     * @return property value of context
+     */
+    public String getContext() {
+        return context;
+    }
+
+    /**
+     * Setter method for property <tt>context</tt>.
+     *
+     * @param context value to be assigned to property context
+     */
+    public void setContext(String context) {
+        this.context = context;
     }
 
     /**

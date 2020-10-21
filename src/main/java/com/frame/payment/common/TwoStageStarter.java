@@ -1,12 +1,19 @@
 package com.frame.payment.common;
 
+import com.alibaba.fastjson.JSON;
+import com.frame.payment.common.util.LoggerUtil;
+import com.frame.payment.common.util.OrderStatusEnum;
 import com.frame.payment.common.util.TransactionStatusEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.frame.payment.model.OrderRecord;
+import com.frame.payment.service.OrderRecordService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * TwoStageStarter
@@ -16,7 +23,8 @@ import java.util.Set;
  */
 public class TwoStageStarter {
 
-    private static Logger logger = LoggerFactory.getLogger(TwoStageStarter.class);
+    @Autowired
+    private OrderRecordService orderRecordService;
 
     /**
      * 开启两阶段提交
@@ -28,6 +36,12 @@ public class TwoStageStarter {
      * 在本地事务提交、回滚后，Spring事务同步器将取出一阶段保存的信息，自动调用参与者二阶段方法，完成最终提交/回滚。
      */
     public static void startTwoStage() {
+
+        //step2.本地保存订单信息
+
+        OrderRecordService orderRecordService = (OrderRecordService) ApplicationContextGetBeanHelper.getBean(OrderRecordService.class);
+        OrderRecord orderRecord = buildOrderRecord();
+        orderRecordService.saveOrderRecord(orderRecord);
 
         //定义spring事务同步器
         TransactionSynchronizationAdapter tccSynchronizationAdapter = new TransactionSynchronizationAdapter() {
@@ -46,9 +60,12 @@ public class TwoStageStarter {
                         twoPhaseProcess(TransactionStatusEnum.STATUS_ROLLED_BACK.getCode());
                         break;
                     default:
-                        logger.error("tcc transaction status is unknown");
+                        LoggerUtil.error("tcc transaction status is unknown");
                         throw new RuntimeException("tcc transaction status is unknown");
                 }
+
+                //更新事务记录为完成状态
+                updateTccRecord(orderRecord, orderRecordService);
             }
         };
 
@@ -68,14 +85,48 @@ public class TwoStageStarter {
         //获取一阶段调用时保存的参与者信息
         Set<TwoStageCompleter> stageCompletes = TwoStagesThreadLocal.get();
 
-        if (stageCompletes != null) {
-            logger.error("stageCompletes is empty");
+        if (stageCompletes == null) {
+            LoggerUtil.error("stageCompletes is empty");
             return;
         }
 
         for (TwoStageCompleter completer : stageCompletes) {
             completer.invokeAfterPrepare(stage);
         }
+    }
+
+    /**
+     * updateTccRecord
+     *
+     * @param orderRecord
+     * @param orderRecordService
+     */
+    private static void updateTccRecord(OrderRecord orderRecord, OrderRecordService orderRecordService) {
+
+        Set<TwoStageCompleter> stageCompletes = TwoStagesThreadLocal.get();
+
+        orderRecord.setStatus(OrderStatusEnum.COMPLETE.getCode());
+        List<String> feignList = new ArrayList<String>() {{
+            this.add("BalanceServiceClient_balanceReduce");
+            this.add("CouponServiceClient_couponUse");
+        }};
+        orderRecord.setContext(JSON.toJSONString(feignList));
+        orderRecordService.updateByOrderId(orderRecord);
+    }
+
+    /**
+     * build order record
+     *
+     * @return
+     */
+    private static OrderRecord buildOrderRecord() {
+
+        OrderRecord orderRecord = new OrderRecord();
+        orderRecord.setUserId("testUserId");
+        orderRecord.setBizType("payment");
+        orderRecord.setOrderId(UUID.randomUUID().toString());
+        orderRecord.setStatus(OrderStatusEnum.INIT.getCode());
+        return orderRecord;
     }
 
 }
