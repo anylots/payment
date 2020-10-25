@@ -1,6 +1,5 @@
 package com.frame.payment.common;
 
-import com.alibaba.fastjson.JSON;
 import com.frame.payment.common.util.LoggerUtil;
 import com.frame.payment.common.util.OrderStatusEnum;
 import com.frame.payment.common.util.TransactionStatusEnum;
@@ -10,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * TwoStageStarter
@@ -37,12 +33,6 @@ public class TwoStageStarter {
      */
     public static void startTwoStage() {
 
-        //本地保存订单信息
-
-        OrderRecordService orderRecordService = (OrderRecordService) ApplicationContextGetBeanHelper.getBean(OrderRecordService.class);
-        OrderRecord orderRecord = buildOrderRecord();
-        orderRecordService.saveOrderRecord(orderRecord);
-
         //定义spring事务同步器
         TransactionSynchronizationAdapter tccSynchronizationAdapter = new TransactionSynchronizationAdapter() {
 
@@ -65,7 +55,7 @@ public class TwoStageStarter {
                 }
 
                 //更新事务记录为完成状态
-                updateTccRecord(orderRecord, orderRecordService);
+                updateTccRecord();
             }
         };
 
@@ -97,35 +87,17 @@ public class TwoStageStarter {
 
     /**
      * update tcc record
-     *
-     * @param orderRecord
-     * @param orderRecordService
      */
-    private static void updateTccRecord(OrderRecord orderRecord, OrderRecordService orderRecordService) {
+    private static void updateTccRecord() {
 
-        //保存参与者信息，提供事务恢复服务使用
-        List<String> feignList = new ArrayList<>();
-        for (TwoStageCompleter completer : TwoStagesThreadLocal.get()) {
-            feignList.add(completer.getTargetClass().getSimpleName() + "_" + completer.getMethodName());
-        }
-        orderRecord.setContext(JSON.toJSONString(feignList));
+        //order record service
+        OrderRecordService orderRecordService = (OrderRecordService) ApplicationContextGetBeanHelper.getBean(OrderRecordService.class);
+
+        //update tcc record'status to COMPLETE
+        OrderRecord orderRecord = new OrderRecord();
+        orderRecord.setOrderId(ApiContextThreadLocal.get().getOrderId());
         orderRecord.setStatus(OrderStatusEnum.COMPLETE.getCode());
         orderRecordService.updateByOrderId(orderRecord);
-    }
-
-    /**
-     * build order record
-     *
-     * @return
-     */
-    private static OrderRecord buildOrderRecord() {
-
-        OrderRecord orderRecord = new OrderRecord();
-        orderRecord.setUserId("system");
-        orderRecord.setBizType(ApiContextThreadLocal.get().getBizType());
-        orderRecord.setOrderId(UUID.randomUUID().toString());
-        orderRecord.setStatus(OrderStatusEnum.INIT.getCode());
-        return orderRecord;
     }
 
 }

@@ -18,6 +18,11 @@ public class ApiContext {
     private String requestId;
 
     /**
+     * order id
+     */
+    private String orderId;
+
+    /**
      * Getter method for property <tt>bizType</tt>.
      *
      * @return property value of bizType
@@ -51,5 +56,23 @@ public class ApiContext {
      */
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    /**
+     * Getter method for property <tt>orderId</tt>.
+     *
+     * @return property value of orderId
+     */
+    public String getOrderId() {
+        return orderId;
+    }
+
+    /**
+     * Setter method for property <tt>orderId</tt>.
+     *
+     * @param orderId value to be assigned to property orderId
+     */
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 }
