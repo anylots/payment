@@ -1,5 +1,8 @@
 package com.frame.payment.controller;
 
+import com.frame.payment.common.ApiContext;
+import com.frame.payment.common.ApiContextThreadLocal;
+import com.frame.payment.common.util.BizTypeEnum;
 import com.frame.payment.common.util.ResponseUtil;
 import com.frame.payment.common.util.ServiceConstants;
 import com.frame.payment.core.PaymentService;
@@ -35,6 +38,12 @@ public class PaymentController {
 
         //step 1. check parameter
         /**do nothing */
+
+
+        //init apiContext
+        ApiContext apiContext = new ApiContext();
+        apiContext.setBizType(BizTypeEnum.PAYMENT.getCode());
+        ApiContextThreadLocal.set(apiContext);
 
         //step 2. pay with two stage
         paymentService.payWithTwoStage(new ArrayList<>());

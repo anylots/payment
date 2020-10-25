@@ -13,7 +13,6 @@ import com.frame.tcctransaction.service.OrderRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
@@ -49,8 +48,7 @@ public class TccScheduledTask {
 
         for (OrderRecord orderRecord : orderRecords) {
             //解析二阶段参与者列表
-            String context = orderRecord.getContext();
-            List<String> feignList = JSON.parseObject(context, new TypeReference<List<String>>() {
+            List<String> feignList = JSON.parseObject(orderRecord.getContext(), new TypeReference<List<String>>() {
             });
 
             //依次调用参与者，完成二阶段事务
@@ -72,26 +70,23 @@ public class TccScheduledTask {
      */
     private void invokeForFeign(String feignInfo, CommonInfo commonInfo) {
 
-        //feignInfo校验
+        //step1. feignInfo校验
         if (StringUtils.isEmpty(feignInfo) || !feignInfo.contains("_")) {
             LoggerUtil.error(String.format("feignInfo is not available,orderId=", commonInfo.getOrderId()));
             return;
         }
 
-        Assert.isTrue(!StringUtils.isEmpty(feignInfo) && feignInfo.contains("_"), "feignInfo is not available");
-
-        String feignName = feignInfo.split("_")[0];
-        String methodName = feignInfo.split("_")[1];
-        //获取feign class
+        //step2. 获取feign class
         Class clazz = null;
         try {
-            clazz = Class.forName(feignName);
+            clazz = Class.forName(feignInfo.split("_")[0]);
         } catch (ClassNotFoundException e) {
             LoggerUtil.error(String.format("feign class is not found,orderId=", commonInfo.getOrderId()), e);
         }
-        //调用参与者提交、回滚
+
+        //step3.调用参与者提交、回滚
         try {
-            Method method = clazz.getMethod(methodName, new Class[]{CommonInfo.class});
+            Method method = clazz.getMethod(feignInfo.split("_")[1], new Class[]{CommonInfo.class});
             method.invoke(ApplicationContextGetBeanHelper.getBean(clazz), commonInfo);
 
         } catch (ReflectiveOperationException e) {

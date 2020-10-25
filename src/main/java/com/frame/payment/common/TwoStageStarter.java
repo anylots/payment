@@ -37,7 +37,7 @@ public class TwoStageStarter {
      */
     public static void startTwoStage() {
 
-        //step2.本地保存订单信息
+        //本地保存订单信息
 
         OrderRecordService orderRecordService = (OrderRecordService) ApplicationContextGetBeanHelper.getBean(OrderRecordService.class);
         OrderRecord orderRecord = buildOrderRecord();
@@ -96,21 +96,20 @@ public class TwoStageStarter {
     }
 
     /**
-     * updateTccRecord
+     * update tcc record
      *
      * @param orderRecord
      * @param orderRecordService
      */
     private static void updateTccRecord(OrderRecord orderRecord, OrderRecordService orderRecordService) {
 
-        Set<TwoStageCompleter> stageCompletes = TwoStagesThreadLocal.get();
-
-        orderRecord.setStatus(OrderStatusEnum.COMPLETE.getCode());
-        List<String> feignList = new ArrayList<String>() {{
-            this.add("BalanceServiceClient_balanceReduce");
-            this.add("CouponServiceClient_couponUse");
-        }};
+        //保存参与者信息，提供事务恢复服务使用
+        List<String> feignList = new ArrayList<>();
+        for (TwoStageCompleter completer : TwoStagesThreadLocal.get()) {
+            feignList.add(completer.getTargetClass().getSimpleName() + "_" + completer.getMethodName());
+        }
         orderRecord.setContext(JSON.toJSONString(feignList));
+        orderRecord.setStatus(OrderStatusEnum.COMPLETE.getCode());
         orderRecordService.updateByOrderId(orderRecord);
     }
 
@@ -122,8 +121,8 @@ public class TwoStageStarter {
     private static OrderRecord buildOrderRecord() {
 
         OrderRecord orderRecord = new OrderRecord();
-        orderRecord.setUserId("testUserId");
-        orderRecord.setBizType("payment");
+        orderRecord.setUserId("system");
+        orderRecord.setBizType(ApiContextThreadLocal.get().getBizType());
         orderRecord.setOrderId(UUID.randomUUID().toString());
         orderRecord.setStatus(OrderStatusEnum.INIT.getCode());
         return orderRecord;

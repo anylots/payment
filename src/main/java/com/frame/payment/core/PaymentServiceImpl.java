@@ -5,7 +5,6 @@ import com.frame.coupon.common.request.CouponUseInfo;
 import com.frame.payment.common.TwoStageStarter;
 import com.frame.payment.service.BalanceManageService;
 import com.frame.payment.service.CouponManageService;
-import com.frame.payment.service.OrderRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +26,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private CouponManageService couponManageService;
-
-    @Autowired
-    private OrderRecordService orderRecordService;
-
 
     /**
      * 两阶段支付服务
@@ -70,8 +65,8 @@ public class PaymentServiceImpl implements PaymentService {
      */
     private CouponUseInfo buildCouponUseInfo(List<Map<String, Object>> payInfo) {
         CouponUseInfo couponUseInfo = new CouponUseInfo();
-        couponUseInfo.setUserId("testUserId");
-        couponUseInfo.setCouponId("coupon20");
+        couponUseInfo.setUserId("system");
+        couponUseInfo.setCouponId("system_1");
         return couponUseInfo;
     }
 
